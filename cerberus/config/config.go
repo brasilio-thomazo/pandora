@@ -43,8 +43,8 @@ func NewConfig() *Config {
 	slog.Info("loading config from environment variables")
 
 	return &Config{
-		WriteDSN:     GetEnv("DB_WRITE_DSN", WriteDSN),
-		ReadDSN:      GetEnv("DB_READ_DSN", ReadDSN),
+		WriteDSN:     GetEnv("DATABASE_URL_WRITE", WriteDSN),
+		ReadDSN:      GetEnv("DATABASE_URL_READ", ReadDSN),
 		MaxOpenConns: GetEnv("DB_MAX_CONN", MaxOpenConns),
 		MaxIdleConns: GetEnv("DB_MAX_IDLE_CONN", MaxIdleConns),
 		HttpHost:     GetEnv("HTTP_HOST", HttpHost),

@@ -1,0 +1,88 @@
+services:
+  cache:
+    image: redis:alpine
+    container_name: pandora-cache
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 100M
+
+  master:
+    build:
+      context: docker/postgres
+      dockerfile: Dockerfile
+    container_name: pandora-master
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_REPLICATION_USER=replicator
+      - POSTGRES_REPLICATION_PASSWORD=replicator
+      - POSTGRES_REPLICATION_MODE=master
+    volumes:
+      - ./cerberus/docker/create-tables.sh:/docker-entrypoint-initdb.d/001-create-tables.sh
+      - ./cerberus/docker/init-data.sh:/docker-entrypoint-initdb.d/002-init-data.sh
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  replica01:
+    build:
+      context: docker/postgres
+      dockerfile: Dockerfile
+    container_name: pandora-replica01
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+    environment:
+      - POSTGRES_REPLICATION_MODE=slave
+      - POSTGRES_REPLICATION_USER=replicator
+      - POSTGRES_REPLICATION_PASSWORD=replicator
+      - POSTGRES_PRIMARY_HOST=master
+      - POSTGRES_PRIMARY_PORT=5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      master:
+        condition: service_healthy
+  cerberus:
+    build:
+      context: cerberus
+      dockerfile: Dockerfile
+    container_name: pandora-cerberus
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 128M
+    environment:
+      - DATABASE_URL_WRITE=postgres://postgres:postgres@master:5432/cerberus?sslmode=disable
+      - DATABASE_URL_READ=postgres://postgres:postgres@replica01:5432/cerberus?sslmode=disable
+      - CACHE_URL=redis://cache:6379
+      - HTTP_HOST=0.0.0.0
+    depends_on:
+      master:
+        condition: service_healthy
+      replica01:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
