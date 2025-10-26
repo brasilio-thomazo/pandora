@@ -10,7 +10,7 @@ import (
 
 type TypeModel interface {
 	IModel
-	*Domain | *Permission
+	any
 }
 
 type IModel interface {

@@ -14,3 +14,23 @@ Content-Type: application/json
     "/branch"
   ]
 }
+
+
+###
+GET {{base}}/permission
+
+
+###
+GET {{base}}/role
+
+
+###
+POST {{base}}/role
+Content-Type: application/json
+
+{
+  "name": "acesso total",
+  "description": "acesso completo ao sistema",
+  "domain_id": "730c6128-a6d9-4ba8-ac5b-47c82d71e411",
+  "permission_id": "7bf2a789-e522-4a2b-a6e1-b04c0b40296d"
+}

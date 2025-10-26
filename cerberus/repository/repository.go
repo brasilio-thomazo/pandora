@@ -11,8 +11,10 @@ import (
 
 type IRepository[T model.TypeModel] interface {
 	FindAll(ctx context.Context) ([]T, error)
+	FindAllWithRelationships(ctx context.Context, relationships ...string) ([]T, error)
 	FindByIds(ctx context.Context, ids []uuid.UUID) ([]T, error)
 	FindById(ctx context.Context, id uuid.UUID) (T, error)
+	FindByIdWithRelationships(ctx context.Context, id uuid.UUID, relationships ...string) (T, error)
 	ExistsById(ctx context.Context, id uuid.UUID) (bool, error)
 	Create(ctx context.Context, data T) error
 	Update(ctx context.Context, id uuid.UUID, data T) error
@@ -35,6 +37,16 @@ func (r *Repository[T]) FindAll(ctx context.Context) ([]T, error) {
 	return result, err
 }
 
+func (r *Repository[T]) FindAllWithRelationships(ctx context.Context, relationships ...string) ([]T, error) {
+	var result []T
+	db := r.db.Read.WithContext(ctx)
+	for _, relationship := range relationships {
+		db = db.Preload(relationship)
+	}
+	err := db.Find(&result).Error
+	return result, err
+}
+
 func (r *Repository[T]) FindByIds(ctx context.Context, ids []uuid.UUID) ([]T, error) {
 	var result []T
 	err := r.db.Read.WithContext(ctx).Where("id in (?)", ids).Find(&result).Error
@@ -44,6 +56,16 @@ func (r *Repository[T]) FindByIds(ctx context.Context, ids []uuid.UUID) ([]T, er
 func (r *Repository[T]) FindById(ctx context.Context, id uuid.UUID) (T, error) {
 	var result T
 	err := r.db.Read.WithContext(ctx).Where("id = ?", id).First(&result).Error
+	return result, err
+}
+
+func (r *Repository[T]) FindByIdWithRelationships(ctx context.Context, id uuid.UUID, relationships ...string) (T, error) {
+	var result T
+	db := r.db.Read.WithContext(ctx)
+	for _, relationship := range relationships {
+		db = db.Preload(relationship)
+	}
+	err := db.Where("id = ?", id).First(&result).Error
 	return result, err
 }
 

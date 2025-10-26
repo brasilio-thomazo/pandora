@@ -22,6 +22,12 @@ func Httpd(config *config.Config, db *database.Pool, dbc *database.Cache) error 
 	domain := controller.NewDomainController(db, dbc)
 	domain.Register(app.Group("/api"))
 
+	permission := controller.NewPermissionController(db, dbc)
+	permission.Register(app.Group("/api"))
+
+	role := controller.NewRoleController(db, dbc)
+	role.Register(app.Group("/api"))
+
 	defer app.Shutdown()
 
 	return app.Listen(addr)
