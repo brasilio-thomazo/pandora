@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"log"
+	"regexp"
 	"time"
 
 	"bitbucket.org/brasilio/pandora/cerberus/config"
@@ -35,6 +36,9 @@ func NewPool(config *config.Config) (*Pool, error) {
 }
 
 func connect(dsn string, config *config.Config) (*gorm.DB, error) {
+	re := regexp.MustCompile("postgres://(.+?):(.+?)@(.+)")
+	url := re.ReplaceAllString(dsn, "postgres://$1:******@$3")
+	log.Printf("connecting to database at %s", url)
 	logger := logger.New(log.Default(), logger.Config{
 		SlowThreshold:             200 * time.Millisecond,
 		LogLevel:                  logger.Info,
@@ -56,4 +60,12 @@ func notDeleted(db *gorm.DB) *gorm.DB {
 
 func orderByCreated(db *gorm.DB) *gorm.DB {
 	return db.Order("created_at")
+}
+
+func (p *Pool) Close() {
+	dbw, _ := p.Write.DB()
+	dbw.Close()
+
+	dbr, _ := p.Read.DB()
+	dbr.Close()
 }

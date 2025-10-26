@@ -20,17 +20,34 @@ type IService[T model.TypeModel] interface {
 }
 
 type Service[T model.TypeModel] struct {
-	repo repository.IRepository[T]
+	repo  repository.IRepository[T]
+	cache repository.ICacheRepository[T]
 }
 
-func NewService[T model.TypeModel](repo repository.IRepository[T]) *Service[T] {
+func NewService[T model.TypeModel](repo repository.IRepository[T], cache repository.ICacheRepository[T]) *Service[T] {
 	return &Service[T]{
-		repo: repo,
+		repo:  repo,
+		cache: cache,
 	}
 }
 
 func (s *Service[T]) FindAll(ctx context.Context) ([]T, error) {
-	return s.repo.FindAll(ctx)
+	cache, err := s.cache.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if cache != nil {
+		return cache, nil
+	}
+	data, err := s.repo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = s.cache.SetList(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func (s *Service[T]) FindByIds(ctx context.Context, ids []uuid.UUID) ([]T, error) {
@@ -38,7 +55,22 @@ func (s *Service[T]) FindByIds(ctx context.Context, ids []uuid.UUID) ([]T, error
 }
 
 func (s *Service[T]) FindById(ctx context.Context, id uuid.UUID) (T, error) {
-	return s.repo.FindById(ctx, id)
+	cache, err := s.cache.FindOne(ctx, id)
+	if err != nil {
+		return *new(T), err
+	}
+	if cache != nil {
+		return *cache, nil
+	}
+	data, err := s.repo.FindById(ctx, id)
+	if err != nil {
+		return *new(T), err
+	}
+	err = s.cache.SetOne(ctx, id, data)
+	if err != nil {
+		return *new(T), err
+	}
+	return data, nil
 }
 
 func (s *Service[T]) ExistsById(ctx context.Context, id uuid.UUID) (bool, error) {
@@ -61,7 +93,10 @@ func (s *Service[T]) Update(ctx context.Context, id uuid.UUID, data T) error {
 	timestamp := time.Now().Unix()
 	data.SetId(id)
 	data.SetUpdatedAt(timestamp)
-	return s.repo.Update(ctx, id, data)
+	if err := s.repo.Update(ctx, id, data); err != nil {
+		return err
+	}
+	return s.cache.DeleteOne(ctx, id)
 }
 
 func (s *Service[T]) Delete(ctx context.Context, id uuid.UUID) error {

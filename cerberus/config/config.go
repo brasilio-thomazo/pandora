@@ -9,12 +9,16 @@ import (
 )
 
 const (
-	WriteDSN     string = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
-	ReadDSN      string = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
-	MaxOpenConns int    = 10
-	MaxIdleConns int    = 10
-	HttpHost     string = "0.0.0.0"
-	HttpPort     int    = 8080
+	WriteDSN      string = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+	ReadDSN       string = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+	MaxOpenConns  int    = 10
+	MaxIdleConns  int    = 10
+	RedisAddr     string = "localhost:6379"
+	RedisDatabase int    = 0
+	RedisPassword string = ""
+	CacheTTL      int64  = 60
+	HttpHost      string = "0.0.0.0"
+	HttpPort      int    = 8080
 )
 
 type ValueType interface {
@@ -27,6 +31,10 @@ type Config struct {
 	MaxOpenConns    int
 	MaxIdleConns    int
 	ConnMaxLifetime int64
+	RedisAddr       string
+	RedisDatabase   int
+	RedisPassword   string
+	CacheTTL        int64
 	HttpHost        string
 	HttpPort        int
 	Logger          *slog.Logger
@@ -43,13 +51,17 @@ func NewConfig() *Config {
 	slog.Info("loading config from environment variables")
 
 	return &Config{
-		WriteDSN:     GetEnv("DATABASE_URL_WRITE", WriteDSN),
-		ReadDSN:      GetEnv("DATABASE_URL_READ", ReadDSN),
-		MaxOpenConns: GetEnv("DB_MAX_CONN", MaxOpenConns),
-		MaxIdleConns: GetEnv("DB_MAX_IDLE_CONN", MaxIdleConns),
-		HttpHost:     GetEnv("HTTP_HOST", HttpHost),
-		HttpPort:     GetEnv("HTTP_PORT", HttpPort),
-		Logger:       logger,
+		WriteDSN:      GetEnv("DATABASE_URL_WRITE", WriteDSN),
+		ReadDSN:       GetEnv("DATABASE_URL_READ", ReadDSN),
+		MaxOpenConns:  GetEnv("DB_MAX_CONN", MaxOpenConns),
+		MaxIdleConns:  GetEnv("DB_MAX_IDLE_CONN", MaxIdleConns),
+		RedisAddr:     GetEnv("REDIS_ADDR", RedisAddr),
+		RedisDatabase: GetEnv("REDIS_DATABASE", RedisDatabase),
+		RedisPassword: GetEnv("REDIS_PASSWORD", RedisPassword),
+		CacheTTL:      GetEnv("CACHE_TTL", CacheTTL),
+		HttpHost:      GetEnv("HTTP_HOST", HttpHost),
+		HttpPort:      GetEnv("HTTP_PORT", HttpPort),
+		Logger:        logger,
 	}
 }
 

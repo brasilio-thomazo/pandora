@@ -15,10 +15,11 @@ type DomainService struct {
 	repo repository.IDomainRepository
 }
 
-func NewDomainService(pool *database.Pool) *DomainService {
-	repo := repository.NewDomainRepository(pool)
+func NewDomainService(db *database.Pool, dbc *database.Cache) *DomainService {
+	repo := repository.NewDomainRepository(db)
+	cache := repository.NewCacheRepository[*model.Domain](dbc, "domain")
 	return &DomainService{
-		Service: NewService(repo),
+		Service: NewService(repo, cache),
 		repo:    repo,
 	}
 }

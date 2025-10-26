@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Httpd(config *config.Config, db *database.Pool) error {
+func Httpd(config *config.Config, db *database.Pool, dbc *database.Cache) error {
 	app := fiber.New(fiber.Config{Prefork: false})
 	addr := fmt.Sprintf("%s:%d", config.HttpHost, config.HttpPort)
 	log.Printf("listening on %s", addr)
@@ -19,8 +19,10 @@ func Httpd(config *config.Config, db *database.Pool) error {
 		return c.JSON(fiber.Map{"message": "service is healthy"})
 	})
 
-	domain := controller.NewDomainController(db)
+	domain := controller.NewDomainController(db, dbc)
 	domain.Register(app.Group("/api"))
+
+	defer app.Shutdown()
 
 	return app.Listen(addr)
 }

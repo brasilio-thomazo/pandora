@@ -11,8 +11,8 @@ type DomainController struct {
 	*Controller[*model.Domain]
 }
 
-func NewDomainController(pool *database.Pool) *DomainController {
-	srv := service.NewDomainService(pool)
+func NewDomainController(db *database.Pool, dbc *database.Cache) *DomainController {
+	srv := service.NewDomainService(db, dbc)
 	return &DomainController{
 		Controller: NewController(srv),
 	}

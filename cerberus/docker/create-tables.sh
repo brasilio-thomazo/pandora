@@ -16,7 +16,7 @@ psql -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d cerberus <<-EOSQL
 	        "updated_at" bigint not null default unix_timestamp (),
 	        "deleted_at" bigint null
 	    );
-	create unique index "idx_permissions_name" on "permissions" (lower("name")) where "deleted_at" is null;
+	create unique index if not exists "idx_permissions_name" on "permissions" (lower("name")) where "deleted_at" is null;
 
 	create table if not exists "domains" (
 	        "id" uuid primary key default gen_random_uuid (),
@@ -28,7 +28,7 @@ psql -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d cerberus <<-EOSQL
 	        "updated_at" bigint not null default unix_timestamp (),
 	        "deleted_at" bigint null
 	    );
-	create unique index "idx_domains_name" on "domains" (lower("name")) where "deleted_at" is null;
+	create unique index if not exists "idx_domains_name" on "domains" (lower("name")) where "deleted_at" is null;
 
 	create table if not exists "roles" (
 	        "id" uuid primary key default gen_random_uuid (),
@@ -43,5 +43,5 @@ psql -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d cerberus <<-EOSQL
 	        foreign key (domain_id) references domains (id) on update cascade on delete cascade,
 	        foreign key (permission_id) references permissions (id) on update cascade on delete cascade
 	    );
-	create unique index "idx_roles_name" on "roles" (lower("name"), "domain_id", "permission_id") where "deleted_at" is null;
+	create unique index if not exists "idx_roles_name"  on "roles" (lower("name"), "domain_id", "permission_id") where "deleted_at" is null;
 EOSQL
