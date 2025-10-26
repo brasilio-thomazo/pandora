@@ -1,0 +1,16 @@
+@base=http://127.0.0.1:4000/api
+
+GET {{base}}/domain
+
+
+###
+POST {{base}}/domain
+Content-Type: application/json
+
+{
+  "name": "SERVICES",
+  "description": "acesso ao dominio de serviços",
+  "paths": [
+    "/branch"
+  ]
+}

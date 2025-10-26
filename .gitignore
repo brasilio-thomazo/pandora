@@ -1,0 +1,42 @@
+# binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# env files
+.env
+.env-production
+
+# keys
+*.key
+*.pem
+
+# go workspace
+go.work
+go.work.sum
+
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# trash of windows
+.DS_store
+Thumbs.db
+Desktop.ini
+
+# logs
+*.log
+
+# build
+bin/
+target/
+
+# icon
+icon.png

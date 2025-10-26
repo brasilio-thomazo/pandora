@@ -1,0 +1,11 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Caixa -->
+  <rect x="40" y="80" width="120" height="80" rx="10" ry="10" fill="#FFD700" stroke="#B8860B" stroke-width="4"/>
+  
+  <!-- Tampa ligeiramente aberta -->
+  <polygon points="40,80 160,80 150,60 50,60" fill="#FFA500" stroke="#B8860B" stroke-width="4"/>
+  
+  <!-- Luz saindo da caixa -->
+  <path d="M100 60 L100 20 M100 60 L80 30 M100 60 L120 30" stroke="#FFFFE0" stroke-width="3" stroke-linecap="round"/>
+</svg>
+
