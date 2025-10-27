@@ -10,7 +10,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.1"
+          cpus: 0.1
           memory: 100M
 
   master:
@@ -21,7 +21,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: 0.5
           memory: 512M
     environment:
       - POSTGRES_USER=postgres
@@ -46,7 +46,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.25"
+          cpus: 0.25
           memory: 256M
     environment:
       - POSTGRES_REPLICATION_MODE=slave
@@ -70,7 +70,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.2"
+          cpus: 0.2
           memory: 128M
     environment:
       - DATABASE_URL_WRITE=postgres://postgres:postgres@master:5432/cerberus?sslmode=disable
